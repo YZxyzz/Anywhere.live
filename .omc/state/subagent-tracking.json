@@ -1,7 +1,26 @@
 {
-  "agents": [],
-  "total_spawned": 0,
+  "agents": [
+    {
+      "agent_id": "a47f200",
+      "agent_type": "general-purpose",
+      "started_at": "2026-02-11T12:44:47.421Z",
+      "parent_mode": "none",
+      "status": "failed",
+      "completed_at": "2026-02-11T12:49:58.888Z",
+      "duration_ms": 311467
+    },
+    {
+      "agent_id": "a243aff",
+      "agent_type": "general-purpose",
+      "started_at": "2026-02-11T12:44:50.817Z",
+      "parent_mode": "none",
+      "status": "failed",
+      "completed_at": "2026-02-11T12:49:03.844Z",
+      "duration_ms": 253027
+    }
+  ],
+  "total_spawned": 2,
   "total_completed": 0,
-  "total_failed": 0,
-  "last_updated": "2026-02-11T12:19:05.737Z"
+  "total_failed": 2,
+  "last_updated": "2026-02-11T12:52:46.416Z"
 }

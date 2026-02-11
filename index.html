@@ -5,88 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AnyWhere「无所住」</title>
-
-  <!-- Preload critical resources -->
-  <link rel="preload" as="image" href="./hero-bg.jpg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <script type="module" crossorigin src="./assets/index-4QBD3uwS.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-D4OoB2AK.css">
   <style>
     footer div.flex.flex-wrap.justify-center.gap-6,
     footer div.flex.justify-center.gap-4.mb-10 {
       display: none !important;
-    }
-
-    /* === PERFORMANCE OVERRIDES === */
-
-    /* 1. Replace transition-all with specific properties (GPU-friendly) */
-    .transition-all {
-      transition-property: opacity, transform, color, background-color, border-color, box-shadow !important;
-    }
-
-    /* 2. Hero background: remove transition conflict with parallax scroll */
-    .hero-bg {
-      transition-property: opacity, transform !important;
-      will-change: transform, opacity;
-    }
-
-    /* 3. Navbar: avoid transitioning height (causes layout thrashing) */
-    nav.fixed {
-      transition-property: background-color, box-shadow, backdrop-filter !important;
-      will-change: background-color;
-    }
-    nav.fixed > div {
-      transition-property: none !important;
-    }
-
-    /* 4. Replace backdrop-blur with solid background on mobile for navbar */
-    @media (max-width: 768px) {
-      nav.fixed .backdrop-blur-md,
-      nav.fixed.backdrop-blur-md {
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
-        background-color: rgba(245, 240, 232, 0.97) !important;
-      }
-    }
-
-    /* 5. Reduce grain overlay impact */
-    .grain-overlay,
-    [class*="grain"] {
-      display: none !important;
-    }
-
-    /* 6. Optimize infinite animations on mobile */
-    @media (max-width: 768px) {
-      .floating {
-        animation-duration: 8s !important;
-        will-change: transform;
-      }
-      .scroll-indicator {
-        will-change: transform;
-      }
-    }
-
-    /* 7. GPU-accelerate animated elements */
-    [class*="translate-"],
-    [class*="scale-"],
-    [class*="rotate-"] {
-      will-change: transform;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
-
-    /* 8. Optimize clip-path transitions */
-    [style*="clipPath"] {
-      will-change: clip-path;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
-
-    /* 9. Image rendering optimization */
-    img {
-      content-visibility: auto;
     }
   </style>
 </head>
@@ -110,7 +34,7 @@
         限量12位，人满即止
       </div>
       <div class="flex justify-center mb-6">
-        <img src="./assets/qrcode.png" alt="Scan to Apply" class="w-56 h-56 object-contain mix-blend-multiply">
+        <img src="./assets/qrcode-v2.png" alt="Scan to Apply" class="w-56 h-56 object-contain mix-blend-multiply">
       </div>
       <p class="text-[#999] text-sm tracking-widest">扫码立即申请</p>
     </div>
@@ -148,41 +72,6 @@
           if (e.target === modal) closeModal();
         });
       }
-
-      // === PERFORMANCE OPTIMIZATIONS ===
-
-      // 1. Add lazy loading to below-fold images
-      const imgObserver = new MutationObserver(() => {
-        const images = document.querySelectorAll('#root img:not([loading])');
-        if (images.length === 0) return;
-        images.forEach((img, i) => {
-          if (i === 0) {
-            img.setAttribute('fetchpriority', 'high');
-            img.setAttribute('decoding', 'sync');
-          } else {
-            img.setAttribute('loading', 'lazy');
-            img.setAttribute('decoding', 'async');
-          }
-        });
-        imgObserver.disconnect();
-      });
-      imgObserver.observe(document.getElementById('root'), { childList: true, subtree: true });
-
-      // 2. After React mounts, patch hero-bg to remove transition conflict with parallax
-      setTimeout(() => {
-        const heroBg = document.querySelector('.hero-bg');
-        if (heroBg) {
-          // After the entrance animation completes (2s), remove transition entirely
-          // so parallax scroll is instant
-          setTimeout(() => {
-            heroBg.style.transition = 'none';
-          }, 2500);
-        }
-        // Remove grain overlay if it exists
-        const grain = document.querySelector('.grain-overlay') ||
-                      document.querySelector('[class*="grain"]');
-        if (grain) grain.remove();
-      }, 200);
 
       // GLOBAL EVENT DELEGATION (CAPTURE PHASE)
       document.body.addEventListener('click', (e) => {
