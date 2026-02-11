@@ -87,24 +87,83 @@
   <div id="root"></div>
 
   <!-- QR Code Modal -->
-  <div id="qr-modal"
-    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 hidden transition-opacity duration-300">
-    <div
-      class="bg-[#fbf7f2] rounded-2xl p-8 max-w-sm w-[90%] relative text-center shadow-2xl transform transition-all scale-100">
-      <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <h3 class="text-2xl font-serif text-[#4a4a4a] mb-1 tracking-wide">成为Founding Member</h3>
-      <p class="text-xl font-serif text-[#4a4a4a] mb-6 tracking-wide">与KUN共创这场全球之旅</p>
-      <div class="bg-[#efe3e3] text-[#8a4b4b] rounded-full py-1.5 px-6 inline-block mb-8 text-sm tracking-widest">
-        限量12位，人满即止
+  <style>
+    #qr-modal {
+      position: fixed; inset: 0; z-index: 99999;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    #qr-modal.active { display: flex; }
+    #qr-modal .qr-card {
+      background: #fbf7f2;
+      border-radius: 20px;
+      padding: 40px 32px 36px;
+      max-width: 360px;
+      width: 88%;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+      transform: scale(0.95);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    #qr-modal.active .qr-card {
+      transform: scale(1);
+      opacity: 1;
+    }
+    #qr-modal .qr-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; cursor: pointer;
+      color: #999; font-size: 24px; line-height: 1;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
+    }
+    #qr-modal .qr-close:hover { background: rgba(0,0,0,0.06); color: #666; }
+    #qr-modal .qr-title {
+      font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
+      font-size: 26px; font-weight: 500; color: #3a3a3a;
+      margin: 0 0 4px; line-height: 1.4;
+    }
+    #qr-modal .qr-subtitle {
+      font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 400; color: #4a4a4a;
+      margin: 0 0 20px; line-height: 1.4;
+    }
+    #qr-modal .qr-badge {
+      display: inline-block;
+      background: #f0e4e4; color: #8a4b4b;
+      border-radius: 999px; padding: 6px 24px;
+      font-size: 14px; letter-spacing: 0.1em;
+      margin-bottom: 28px;
+    }
+    #qr-modal .qr-img-wrap {
+      display: flex; justify-content: center; margin-bottom: 24px;
+    }
+    #qr-modal .qr-img-wrap img {
+      width: 220px; height: 220px;
+      object-fit: contain;
+      background: #fff;
+      padding: 8px;
+      border-radius: 8px;
+    }
+    #qr-modal .qr-hint {
+      color: #aaa; font-size: 14px; letter-spacing: 0.15em; margin: 0;
+    }
+  </style>
+  <div id="qr-modal">
+    <div class="qr-card">
+      <button class="qr-close" id="close-modal">&times;</button>
+      <div class="qr-title">成为Founding Member</div>
+      <div class="qr-subtitle">与KUN共创这场全球之旅</div>
+      <div class="qr-badge">限量12位，人满即止</div>
+      <div class="qr-img-wrap">
+        <img src="./assets/qrcode.png" alt="Scan QR Code">
       </div>
-      <div class="flex justify-center mb-6">
-        <img src="./assets/qrcode.png" alt="Scan to Apply" class="w-56 h-56 object-contain mix-blend-multiply">
-      </div>
-      <p class="text-[#999] text-sm tracking-widest">扫码立即申请</p>
+      <p class="qr-hint">扫码立即申请</p>
     </div>
   </div>
 
@@ -117,20 +176,17 @@
       const openModal = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-          const content = modal.firstElementChild;
-          content.classList.remove('scale-95', 'opacity-0');
-          content.classList.add('scale-100', 'opacity-100');
-        }, 50);
+        modal.classList.add('active');
       };
 
       const closeModal = () => {
-        const content = modal.firstElementChild;
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
+        const card = modal.querySelector('.qr-card');
+        card.style.transform = 'scale(0.95)';
+        card.style.opacity = '0';
         setTimeout(() => {
-          modal.classList.add('hidden');
+          modal.classList.remove('active');
+          card.style.transform = '';
+          card.style.opacity = '';
         }, 300);
       };
 
