@@ -44,34 +44,47 @@
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('qr-modal');
       const closeBtn = document.getElementById('close-modal');
-      const targetTexts = ["立即申请", "了解详情", "探索更多", "Apply Now", "Learn More", "Explore More"];
+      const targetTexts = ["立即申请", "了解详情", "探索更多", "Apply Now", "Learn More", "Explore More", "Founding Member"];
 
       const openModal = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         modal.classList.remove('hidden');
         setTimeout(() => {
-          modal.firstElementChild.classList.remove('scale-95', 'opacity-0');
-          modal.firstElementChild.classList.add('scale-100', 'opacity-100');
-        }, 10);
+          const content = modal.firstElementChild;
+          content.classList.remove('scale-95', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+        }, 50);
       };
 
       const closeModal = () => {
-        modal.classList.add('hidden');
+        const content = modal.firstElementChild;
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
       };
 
-      closeBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-      });
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
 
-      // Attach listeners to buttons matching text
-      const buttons = document.querySelectorAll('a, button');
-      buttons.forEach(btn => {
-        if (targetTexts.some(t => btn.textContent.trim().includes(t))) {
-          btn.addEventListener('click', openModal);
-          btn.style.cursor = 'pointer'; // Ensure it looks clickable
+      // GLOBAL EVENT DELEGATION (CAPTURE PHASE)
+      document.body.addEventListener('click', (e) => {
+        const target = e.target.closest('a, button, [role="button"]');
+        if (target) {
+          const text = target.textContent.trim();
+          if (targetTexts.some(t => text.includes(t))) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            openModal(e);
+          }
         }
-      });
+      }, true);
     });
   </script>
 </body>
