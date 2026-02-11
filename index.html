@@ -5,6 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AnyWhere「无所住」</title>
+
+  <!-- Preload critical resources -->
+  <link rel="preload" as="image" href="./hero-bg.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <script type="module" crossorigin src="./assets/index-4QBD3uwS.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-D4OoB2AK.css">
   <style>
@@ -12,6 +18,68 @@
     footer div.flex.justify-center.gap-4.mb-10 {
       display: none !important;
     }
+
+    /* === PERFORMANCE OVERRIDES === */
+
+    /* 1. Replace transition-all with GPU-friendly properties only */
+    .transition-all {
+      transition-property: opacity, transform, color, background-color, border-color, box-shadow !important;
+    }
+
+    /* 2. Hero bg: only animate opacity+transform, enable GPU layer */
+    .hero-bg {
+      transition-property: opacity, transform !important;
+      will-change: transform, opacity;
+    }
+
+    /* 3. Navbar: stop transitioning height (causes layout thrash) */
+    nav.fixed {
+      transition-property: background-color, box-shadow, backdrop-filter !important;
+    }
+    nav.fixed > div {
+      transition-property: none !important;
+    }
+
+    /* 4. Replace backdrop-blur with solid bg on mobile */
+    @media (max-width: 768px) {
+      nav.fixed .backdrop-blur-md,
+      nav.fixed.backdrop-blur-md {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        background-color: rgba(245, 240, 232, 0.97) !important;
+      }
+    }
+
+    /* 5. Hide grain overlay (SVG filter on every frame) */
+    .grain-overlay, [class*="grain"] {
+      display: none !important;
+    }
+
+    /* 6. GPU-accelerate animated elements */
+    [class*="translate-"], [class*="scale-"], [class*="rotate-"] {
+      will-change: transform;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    /* 7. Image rendering optimization */
+    img { content-visibility: auto; }
+
+    /* === SPEED UP SCROLL ANIMATIONS (~60% faster) === */
+
+    /* Speed up all Tailwind transition durations */
+    .duration-500  { transition-duration: 300ms !important; }
+    .duration-600  { transition-duration: 350ms !important; }
+    .duration-700  { transition-duration: 400ms !important; }
+    .duration-800  { transition-duration: 450ms !important; }
+    .duration-1000 { transition-duration: 500ms !important; }
+    .duration-1200 { transition-duration: 600ms !important; }
+    .duration-1500 { transition-duration: 700ms !important; }
+    .duration-\[2000ms\] { transition-duration: 1000ms !important; }
+
+    /* Keep short durations snappy */
+    .duration-300  { transition-duration: 200ms !important; }
+    .duration-400  { transition-duration: 250ms !important; }
   </style>
 </head>
 
@@ -34,7 +102,7 @@
         限量12位，人满即止
       </div>
       <div class="flex justify-center mb-6">
-        <img src="./assets/qrcode-v2.png" alt="Scan to Apply" class="w-56 h-56 object-contain mix-blend-multiply">
+        <img src="./assets/qrcode.png" alt="Scan to Apply" class="w-56 h-56 object-contain mix-blend-multiply">
       </div>
       <p class="text-[#999] text-sm tracking-widest">扫码立即申请</p>
     </div>
@@ -72,6 +140,41 @@
           if (e.target === modal) closeModal();
         });
       }
+
+      // === PERFORMANCE OPTIMIZATIONS ===
+
+      // 1. Lazy load below-fold images
+      const imgObserver = new MutationObserver(() => {
+        const images = document.querySelectorAll('#root img:not([loading])');
+        if (images.length === 0) return;
+        images.forEach((img, i) => {
+          if (i === 0) {
+            img.setAttribute('fetchpriority', 'high');
+          } else {
+            img.setAttribute('loading', 'lazy');
+            img.setAttribute('decoding', 'async');
+          }
+        });
+        imgObserver.disconnect();
+      });
+      imgObserver.observe(document.getElementById('root'), { childList: true, subtree: true });
+
+      // 2. Speed up transition delays (~50% faster) after React mounts
+      setTimeout(() => {
+        document.querySelectorAll('#root [style]').forEach(el => {
+          const delay = el.style.transitionDelay;
+          if (delay && delay !== '0s' && delay !== '0ms') {
+            const ms = parseFloat(delay) * (delay.includes('ms') ? 1 : 1000);
+            el.style.transitionDelay = Math.round(ms * 0.5) + 'ms';
+          }
+        });
+        // Remove hero-bg transition after entrance animation (prevent parallax lag)
+        const heroBg = document.querySelector('.hero-bg');
+        if (heroBg) setTimeout(() => { heroBg.style.transition = 'none'; }, 1200);
+        // Remove grain overlay
+        const grain = document.querySelector('.grain-overlay') || document.querySelector('[class*="grain"]');
+        if (grain) grain.remove();
+      }, 100);
 
       // GLOBAL EVENT DELEGATION (CAPTURE PHASE)
       document.body.addEventListener('click', (e) => {
